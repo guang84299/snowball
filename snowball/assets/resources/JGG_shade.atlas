@@ -1,0 +1,27 @@
+
+JGG_shade.png
+size: 1024,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+ling
+  rotate: false
+  xy: 2, 2
+  size: 249, 239
+  orig: 249, 239
+  offset: 0, 0
+  index: -1
+ling2
+  rotate: false
+  xy: 253, 18
+  size: 217, 223
+  orig: 217, 223
+  offset: 0, 0
+  index: -1
+mh
+  rotate: false
+  xy: 472, 125
+  size: 123, 116
+  orig: 123, 116
+  offset: 0, 0
+  index: -1

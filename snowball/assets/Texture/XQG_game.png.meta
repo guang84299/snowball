@@ -1,0 +1,30 @@
+{
+  "ver": "1.0.0",
+  "uuid": "a450e34d-2032-489c-a9ad-1104fc557304",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "subMetas": {
+    "XQG_game": {
+      "ver": "1.0.3",
+      "uuid": "f5196e28-5e75-4cbf-913d-4f6c5e153387",
+      "rawTextureUuid": "a450e34d-2032-489c-a9ad-1104fc557304",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 2,
+      "trimY": 2,
+      "width": 992,
+      "height": 1149,
+      "rawWidth": 996,
+      "rawHeight": 1153,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

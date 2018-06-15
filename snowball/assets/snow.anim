@@ -1,0 +1,49 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "snow",
+  "_objFlags": 0,
+  "_rawFiles": null,
+  "_duration": 0.26666666666666666,
+  "sample": 60,
+  "speed": 1,
+  "wrapMode": "2",
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "19fd2289-971e-42b8-885e-4ba5356bbf40"
+            }
+          },
+          {
+            "frame": 0.08333333333333333,
+            "value": {
+              "__uuid__": "223ee6b3-d7e5-4bcd-ae87-0b2c445d3845"
+            }
+          },
+          {
+            "frame": 0.16666666666666666,
+            "value": {
+              "__uuid__": "13da6aa6-e596-46ac-8078-1b16d93552b8"
+            }
+          },
+          {
+            "frame": 0.23333333333333334,
+            "value": {
+              "__uuid__": "13da6aa6-e596-46ac-8078-1b16d93552b8"
+            }
+          },
+          {
+            "frame": 0.25,
+            "value": {
+              "__uuid__": "e4362af7-1db2-43d9-81eb-54bf5a5687f0"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}

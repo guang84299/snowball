@@ -1,0 +1,62 @@
+
+XQG_player6.png
+size: 256,128
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+maoren_0000-9
+  rotate: false
+  xy: 2, 2
+  size: 19, 17
+  orig: 19, 17
+  offset: 0, 0
+  index: -1
+maoren_0001-11
+  rotate: true
+  xy: 153, 48
+  size: 11, 44
+  orig: 11, 44
+  offset: 0, 0
+  index: -1
+maoren_0002-10
+  rotate: false
+  xy: 153, 61
+  size: 70, 65
+  orig: 70, 65
+  offset: 0, 0
+  index: -1
+maoren_0003-8
+  rotate: false
+  xy: 23, 2
+  size: 19, 17
+  orig: 19, 17
+  offset: 0, 0
+  index: -1
+maoren_0004-10
+  rotate: true
+  xy: 2, 41
+  size: 85, 149
+  orig: 85, 149
+  offset: 0, 0
+  index: -1
+maoren_0005
+  rotate: true
+  xy: 225, 49
+  size: 77, 29
+  orig: 77, 29
+  offset: 0, 0
+  index: -1
+tui
+  rotate: true
+  xy: 119, 16
+  size: 23, 34
+  orig: 23, 34
+  offset: 0, 0
+  index: -1
+yyz
+  rotate: false
+  xy: 2, 21
+  size: 115, 18
+  orig: 115, 18
+  offset: 0, 0
+  index: -1

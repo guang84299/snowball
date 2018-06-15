@@ -1,0 +1,13 @@
+
+XQG_ying.png
+size: 256,128
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+XQG_bird
+  rotate: false
+  xy: 2, 2
+  size: 127, 94
+  orig: 127, 94
+  offset: 0, 0
+  index: -1
