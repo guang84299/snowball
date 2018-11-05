@@ -32,27 +32,27 @@ cc.Class({
             type: cc.Prefab
         },
         audio_get: {
-            url: cc.AudioClip,
+            type: cc.AudioClip,
             default: null
         },
         audio_bird: {
-            url: cc.AudioClip,
+            type: cc.AudioClip,
             default: null
         },
         audio_dead: {
-            url: cc.AudioClip,
+            type: cc.AudioClip,
             default: null
         },
         audio_jump: {
-            url: cc.AudioClip,
+            type: cc.AudioClip,
             default: null
         },
         audio_throw: {
-            url: cc.AudioClip,
+            type: cc.AudioClip,
             default: null
         },
         audio_music: {
-            url: cc.AudioClip,
+            type: cc.AudioClip,
             default: null
         },
         display: cc.Sprite,
@@ -451,8 +451,8 @@ cc.Class({
         this.GAME.po2 = cc.find("Canvas/node_bg/po2");
 
         var angle = 195*Math.PI/180;
-        var vec = cc.p(Math.cos(angle),Math.sin(angle));
-        this.GAME.rVec = cc.pMult(vec,949-122);
+        var vec = cc.v2(Math.cos(angle),Math.sin(angle));
+        this.GAME.rVec = vec.mul(949-122);
 
         this.GAME.treeContainer = cc.find("Canvas/node_bg/treeContainer");
         this.GAME.ballNode = cc.find("Canvas/node_bg/ballNode");
@@ -1118,7 +1118,7 @@ cc.Class({
                 foo: 'bar'
               },
               // envVersion: 'develop',
-              success(res) {
+              success:function(res){
                 // 打开成功
               }
             });
@@ -1150,7 +1150,7 @@ cc.Class({
             foo: 'bar'
           },
           // envVersion: 'develop',
-          success(res) {
+            success:function(res){
             // 打开成功
           }
         });
@@ -1317,23 +1317,23 @@ cc.Class({
     {
         var x = Math.cos(15*Math.PI/180);
         var y = Math.sin(15*Math.PI/180);
-        var vec = cc.pMult(cc.p(x,y),this.GAME.rotate*dt*4.5);
-        var p1 = cc.pAdd(cc.p(this.GAME.po1.getPosition()),vec);
-        this.GAME.po1.setPosition(p1);
+        var vec = cc.v2(x,y).mulSelf(this.GAME.rotate*dt*4.5);
+        var p1 = this.GAME.po1.position.add(vec);
+        this.GAME.po1.position = p1;
 
-        var p2 = cc.pAdd(cc.p(this.GAME.po2.getPosition()),vec);
-        this.GAME.po2.setPosition(p2);
+        var p2 = this.GAME.po2.position.add(vec);
+        this.GAME.po2.position = p2;
 
         if(p1.x>cc.winSize.width+30)
         {
-            var np = cc.pAdd(p2,this.GAME.rVec);
-            this.GAME.po1.setPosition(np);
+            var np = p2.add(this.GAME.rVec);
+            this.GAME.po1.position = np;
         }
 
         if(p2.x>cc.winSize.width+30)
         {
-            var np = cc.pAdd(p1,this.GAME.rVec);
-            this.GAME.po2.setPosition(np);
+            var np = p1.add(this.GAME.rVec);
+            this.GAME.po2.position = np;
         }
 
         var trees = this.GAME.treeContainer.children;
@@ -1361,8 +1361,8 @@ cc.Class({
             for(var i=0;i<trees.length;i++)
             {
                 var shu = trees[i];
-                var p = cc.p(shu.getPosition());
-                shu.setPosition(cc.pAdd(p,vec));
+                var p = cc.v2(shu.position);
+                shu.position = p.add(vec);
                 if(p.x>(cc.winSize.width+100))
                 {
                     shu.destroy();
@@ -1381,12 +1381,12 @@ cc.Class({
         {
             var yun = yuns[i];
             var deff = dt*yun.speed;
-            yun.setPositionX(yun.getPositionX()+deff);
+            yun.x = (yun.x+deff);
             var bx = yun.getBoundingBox();
             if(bx.x>cc.winSize.width+50)
             {
-                yun.setPositionX(-(bx.width+50));
-                yun.setPositionY(Math.floor(Math.random()*(cc.winSize.height*0.9)+cc.winSize.height*0.6));
+                yun.x = -(bx.width+50);
+                yun.y = (Math.floor(Math.random()*(cc.winSize.height*0.9)+cc.winSize.height*0.6));
             }
         }
 
@@ -1399,22 +1399,22 @@ cc.Class({
 
             var s = san[2];
 
-            var x1 = san1.getPositionX()+dt*s;
-            san1.setPositionX(x1);
+            var x1 = san1.x+dt*s;
+            san1.x = x1;
 
-            var x2 = san2.getPositionX()+dt*s;
-            san2.setPositionX(x2);
+            var x2 = san2.x+dt*s;
+            san2.x = x2;
 
             if(x1>cc.winSize.width)
             {
                 var width = san2.getContentSize().width;
-                san1.setPositionX(x2-width);
+                san1.x = (x2-width);
             }
 
             if(x2>cc.winSize.width)
             {
                 var width = san1.getContentSize().width;
-                san2.setPositionX(x1-width);
+                san2.x = (x1-width);
             }
         }
 
@@ -1422,8 +1422,8 @@ cc.Class({
         for(var i=0;i<temps.length;i++)
         {
             var obs = temps[i];
-            var p = cc.pAdd(cc.p(obs.getPosition()),vec);
-            obs.setPosition(p);
+            var p = obs.position.add(vec);
+            obs.position = p;
             if(p.x>=cc.winSize.width/2)
             {
                 this.createBallObs(obs.type);
@@ -1448,7 +1448,7 @@ cc.Class({
 
             var now = 437+373*this.GAME.size-5;
             var deff = now-ori;
-            this.GAME.player.setPositionY(this.GAME.player.getPositionY()+deff);
+            this.GAME.player.y = (this.GAME.player.y+deff);
 
             var temp = dt*10;
             this.GAME.midScore += dt;
@@ -1488,7 +1488,7 @@ cc.Class({
 
         //var m = this.GAME.ballNode.ball.width*this.GAME.ballNode.ball.scale;
         var h = this.dsize.height - cc.winSize.height;
-        var p = this.GAME.ballNode.ball.convertToNodeSpaceAR(cc.p(cc.winSize.width/2+1,437-h/2));
+        var p = this.GAME.ballNode.ball.convertToNodeSpaceAR(cc.v2(cc.winSize.width/2+1,437-h/2));
         obs.x = p.x;
         obs.y = p.y;
 
@@ -1517,8 +1517,8 @@ cc.Class({
             {
                 if(this.GAME.bird.score == 1)
                 {
-                    var p1 = this.GAME.bird.convertToWorldSpaceAR(this.GAME.bird.getPosition());
-                    var p2 = this.GAME.player.convertToWorldSpaceAR(this.GAME.player.getPosition());
+                    var p1 = this.GAME.bird.convertToWorldSpaceAR(this.GAME.bird.position);
+                    var p2 = this.GAME.player.convertToWorldSpaceAR(this.GAME.player.position);
                     if(p1.x-50>p2.x)
                     {
                         this.GAME.bird.score = 0;
@@ -1533,7 +1533,7 @@ cc.Class({
         for(var i=0;i<obss.length;i++)
         {
             var obs = obss[i];
-            var p = this.GAME.ballNode.ball.convertToWorldSpaceAR(obs.getPosition());
+            var p = this.GAME.ballNode.ball.convertToWorldSpaceAR(obs.position);
 
             var oriSign = obs.sign;
             var nowSign = p.x>=cc.winSize.width/2 ? 1 : -1;
@@ -1542,8 +1542,8 @@ cc.Class({
                 obs.life = obs.life - 1;
                 if(obs.type==3)
                 {
-                    var cp = this.GAME.ballNode.ball.convertToNodeSpaceAR(cc.p(p.x,p.y+30));
-                    obs.setPosition(cp);
+                    var cp = this.GAME.ballNode.ball.convertToNodeSpaceAR(cc.v2(p.x,p.y+30));
+                    obs.position = cp;
                 }
             }
 
@@ -1584,7 +1584,7 @@ cc.Class({
         this.GAME.bg.addChild(obs);
         obs.runAction(cc.sequence(
             cc.spawn(
-            cc.moveBy(1,cc.pMult(cc.p(5,1.3),100)),
+            cc.moveBy(1,cc.v2(5,1.3).mulSelf(100)),
             cc.rotateBy(1,360)
             ),
             cc.removeSelf()
@@ -1617,11 +1617,11 @@ cc.Class({
 
         if(isBird)
         {
-            this.GAME.player.runAction(cc.moveBy(1,cc.pMult(cc.p(5,1),150)));
+            this.GAME.player.runAction(cc.moveBy(1,cc.v2(5,1).mulSelf(150)));
         }
         else
         {
-            this.GAME.player.runAction(cc.moveBy(1,cc.pMult(cc.p(-5,1),150)));
+            this.GAME.player.runAction(cc.moveBy(1,cc.v2(-5,1).mulSelf(150)));
         }
 
         var self = this;
@@ -1657,7 +1657,7 @@ cc.Class({
     {
         var x = Math.cos(195*Math.PI/180)*700;
         var y = Math.sin(195*Math.PI/180)*700;
-        this.GAME.ballNode.runAction(cc.moveBy(0.8,cc.p(x,y)));
+        this.GAME.ballNode.runAction(cc.moveBy(0.8,cc.v2(x,y)));
     },
 
     judgeFuhuo: function()
@@ -1836,7 +1836,7 @@ cc.Class({
         ballNode.y = 437+y;
 
         ballNode.runAction(cc.sequence(
-            cc.moveTo(1,cc.p(cc.winSize.width/2,437)),
+            cc.moveTo(1,cc.v2(cc.winSize.width/2,437)),
             cc.callFunc(function()
             {
                 self.GAME.rotate = self.GAME.Config.Rotate[0];
@@ -1849,7 +1849,7 @@ cc.Class({
                 self.GAME.player.y = cc.winSize.height*0.7;
                 self.GAME.player.opacity = 0;
 
-                self.GAME.player.runAction(cc.moveTo(0.1,cc.p(cc.winSize.width/2,437+373*self.GAME.size-5)));
+                self.GAME.player.runAction(cc.moveTo(0.1,cc.v2(cc.winSize.width/2,437+373*self.GAME.size-5)));
                 self.GAME.player.runAction(cc.fadeIn(0.1));
 
                 self.GAME.player.rotation = 0;
@@ -1875,10 +1875,10 @@ cc.Class({
         {
             var width = 40;
             var height = 80;
-            obb.vertex[0] = cc.p(sp.convertToWorldSpace(cc.p(-width/2,0+15)));
-            obb.vertex[1] = cc.p(sp.convertToWorldSpace(cc.p(width/2,0+15)));
-            obb.vertex[2] = cc.p(sp.convertToWorldSpace(cc.p(width/2,height+15)));
-            obb.vertex[3] = cc.p(sp.convertToWorldSpace(cc.p(-width/2,height+15)));
+            obb.vertex[0] = cc.v2(sp.convertToWorldSpaceAR(cc.v2(-width/2,0+15)));
+            obb.vertex[1] = cc.v2(sp.convertToWorldSpaceAR(cc.v2(width/2,0+15)));
+            obb.vertex[2] = cc.v2(sp.convertToWorldSpaceAR(cc.v2(width/2,height+15)));
+            obb.vertex[3] = cc.v2(sp.convertToWorldSpaceAR(cc.v2(-width/2,height+15)));
         }
         else
         {
@@ -1886,18 +1886,18 @@ cc.Class({
             {
                 var width = 80;
                 var height = 40;
-                obb.vertex[0] = cc.p(sp.convertToWorldSpace(cc.p(-width/2,0-15)));
-                obb.vertex[1] = cc.p(sp.convertToWorldSpace(cc.p(width/2,0-15)));
-                obb.vertex[2] = cc.p(sp.convertToWorldSpace(cc.p(width/2,height-15)));
-                obb.vertex[3] = cc.p(sp.convertToWorldSpace(cc.p(-width/2,height-15)));
+                obb.vertex[0] = cc.v2(sp.convertToWorldSpaceAR(cc.v2(-width/2,0-15)));
+                obb.vertex[1] = cc.v2(sp.convertToWorldSpaceAR(cc.v2(width/2,0-15)));
+                obb.vertex[2] = cc.v2(sp.convertToWorldSpaceAR(cc.v2(width/2,height-15)));
+                obb.vertex[3] = cc.v2(sp.convertToWorldSpaceAR(cc.v2(-width/2,height-15)));
             }
             else
             {
                 var bx = sp.getContentSize();
-                obb.vertex[0] = cc.p(sp.convertToWorldSpace(cc.p(0,0)));
-                obb.vertex[1] = cc.p(sp.convertToWorldSpace(cc.p(bx.width,0)));
-                obb.vertex[2] = cc.p(sp.convertToWorldSpace(cc.p(bx.width,bx.height)));
-                obb.vertex[3] = cc.p(sp.convertToWorldSpace(cc.p(0,bx.height)));
+                obb.vertex[0] = cc.v2(sp.convertToWorldSpaceAR(cc.v2(0,0)));
+                obb.vertex[1] = cc.v2(sp.convertToWorldSpaceAR(cc.v2(bx.width,0)));
+                obb.vertex[2] = cc.v2(sp.convertToWorldSpaceAR(cc.v2(bx.width,bx.height)));
+                obb.vertex[3] = cc.v2(sp.convertToWorldSpaceAR(cc.v2(0,bx.height)));
             }
         }
 
@@ -1907,9 +1907,9 @@ cc.Class({
             var vertex = this.vertex;
             for(var i=0;i<4;i++)
             {
-                var p = cc.pSub(vertex[i],vertex[(i+1)%4]);
-                var np = cc.pNormalize(p);
-                axies[i] = cc.p(-np.y,np.x);
+                var p = vertex[i].sub(vertex[(i+1)%4]);
+                var np = p.normalizeSelf();
+                axies[i] = cc.v2(-np.y,np.x);
             }
             return axies;
         };
@@ -1917,11 +1917,11 @@ cc.Class({
         obb.getProjection = function(axie)
         {
             var vertex = this.vertex;
-            var min = cc.pDot(vertex[0],axie);
+            var min = vertex[0].dot(axie);
             var max = min;
             for(var i=1;i<4;i++)
             {
-                var temp = cc.pDot(vertex[i],axie);
+                var temp = vertex[i].dot(axie);
                 if(temp>max)
                 {
                     max = temp;
@@ -1982,14 +1982,14 @@ cc.Class({
         if(!this.GAME.bird)
         {
             this.GAME.bird = cc.instantiate(this.bird);
-            this.GAME.bird.setPosition(cc.p(-50,437+373*this.GAME.size-5+30));
+            this.GAME.bird.position = cc.v2(-50,437+373*this.GAME.size-5+30);
             this.GAME.bg.addChild(this.GAME.bird);
             var self = this;
 
             this.GAME.bird.type = 4;
             this.GAME.bird.score = 1;
             this.GAME.bird.runAction(cc.sequence(
-                cc.moveBy(2,cc.p(cc.winSize.width+100,0)),
+                cc.moveBy(2,cc.v2(cc.winSize.width+100,0)),
                 cc.callFunc(function(){
                     self.GAME.bird.destroy();
                     self.GAME.bird = null;
@@ -2064,7 +2064,7 @@ cc.Class({
                 var st = this.GAME.player.getComponent(sp.Skeleton);
                 st.setAnimation(0,"tiao1",false);
                 var act = cc.sequence(
-                    cc.jumpBy(0.65,cc.p(0,0),90,1),
+                    cc.jumpBy(0.65,cc.v2(0,0),90,1),
                     cc.callFunc(function()
                     {
                         st.setAnimation(0,"pao",true);
@@ -2079,9 +2079,9 @@ cc.Class({
                 this.GAME.player.stopAllActions();
                 var st = this.GAME.player.getComponent(sp.Skeleton);
                 st.setAnimation(0,"tiao2",false);
-                var diffY = 437+373*this.GAME.size-5 - this.GAME.player.getPositionY();
+                var diffY = 437+373*this.GAME.size-5 - this.GAME.player.y;
                 var act = cc.sequence(
-                    cc.jumpBy(0.65,cc.p(0,diffY),210+diffY,1),
+                    cc.jumpBy(0.65,cc.v2(0,diffY),210+diffY,1),
                     cc.callFunc(function()
                     {
                         st.setAnimation(0,"pao",true);
