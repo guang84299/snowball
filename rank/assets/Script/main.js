@@ -45,6 +45,10 @@ cc.Class({
             {
                 self.node_paiming.active = false;
             }
+            else if(data.message == "closeFuhuo")
+            {
+                self.node_fuhuo.active = false;
+            }
             else if(data.message == "friendRank"){ //好友排行榜
                 self.showPaiming();
             }
@@ -52,6 +56,10 @@ cc.Class({
                 self.uploadScore(data.score);
                 self.showOverRank();
                 self.chaoyueData = [];
+            }
+            else if(data.message == "fuhuoRank"){ //下个超越排行榜
+                self.uploadScore(data.score);
+                self.showFuhuoRank(data.score);
             }
             else if(data.message == "loginSuccess")
             {
@@ -108,6 +116,12 @@ cc.Class({
         self.node_paiming_nick = cc.find("bg/box2/itemPaiming/nick",self.node_paiming);
         self.node_paiming_score = cc.find("bg/box2/itemPaiming/score",self.node_paiming);
 
+        self.node_fuhuo = cc.find("Canvas/ui_bg/fuhuo_bg");
+        self.node_fuhuo_icon = cc.find("bg/bg/icon",self.node_fuhuo);
+        self.node_fuhuo_nick = cc.find("bg/bg/nike",self.node_fuhuo);
+        self.node_fuhuo_score = cc.find("bg/bg/score",self.node_fuhuo);
+        self.node_fuhuo_no = cc.find("bg/bg/no",self.node_fuhuo);
+
         self.node_chaoyue = cc.find("Canvas/node_chaoyue");
     },
 
@@ -115,6 +129,68 @@ cc.Class({
     click: function(event,data)
     {
 
+    },
+
+    showFuhuoRank: function(score)
+    {
+        this.node_fuhuo.active = true;
+
+        var self = this;
+        if(this.friendRank && this.userInfo)
+        {
+            self.showFuhuoRank2(score);
+        }
+        else
+        {
+            this.getFriendRank(function(){
+                self.showFuhuoRank2(score);
+            });
+        }
+    },
+
+    showFuhuoRank2: function(score)
+    {
+        if(this.friendRank && this.userInfo)
+        {
+            var chaoyue = null;
+            for(var i=this.friendRank.length-1;i>=0;i--)
+            {
+                var data = this.friendRank[i];
+                if(data.nickname != this.userInfo.nickName &&
+                    data.avatarUrl != this.userInfo.avatarUrl)
+                {
+                    var feiji_rank = data.KVDataList[0].value;
+                    var rank  = JSON.parse(feiji_rank);
+                    if(score < rank.wxgame.score)
+                    {
+                        chaoyue = data;
+                        break;
+                    }
+                }
+            }
+            //if(chaoyue == null && this.friendRank.length>0)
+            //    chaoyue = this.friendRank[0];
+            if(chaoyue)
+            {
+                this.node_fuhuo_no.active = false;
+                this.node_fuhuo_nick.active = true;
+                this.node_fuhuo_score.active = true;
+                this.node_fuhuo_icon.active = true;
+                var feiji_rank = chaoyue.KVDataList[0].value;
+                var rank  = JSON.parse(feiji_rank);
+
+                this.loadPic(this.node_fuhuo_icon,chaoyue.avatarUrl);
+                this.node_fuhuo_nick.getComponent("cc.Label").string = chaoyue.nickname;
+                this.node_fuhuo_score.getComponent("cc.Label").string = "得分:"+rank.wxgame.score;
+            }
+            else
+            {
+                this.node_fuhuo_no.active = true;
+                this.node_fuhuo_nick.active = false;
+                this.node_fuhuo_score.active = false;
+                this.node_fuhuo_icon.active = false;
+            }
+        }
     },
 
     existChaoYue: function(data)

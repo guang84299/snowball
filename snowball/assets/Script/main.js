@@ -1,3 +1,4 @@
+var qianqista = require("qianqista");
 cc.Class({
     extends: cc.Component,
 
@@ -50,6 +51,10 @@ cc.Class({
             url: cc.AudioClip,
             default: null
         },
+        audio_music: {
+            url: cc.AudioClip,
+            default: null
+        },
         display: cc.Sprite,
         display_gray: cc.Node,
         display_gray_rank: cc.Node,
@@ -67,6 +72,7 @@ cc.Class({
         this.userInfo = {};
         this.uploadScoreDt = 0;
         this.openover = false;
+        this.NetConfig= [];
 
         this.initData();
         this.initUI();
@@ -74,133 +80,215 @@ cc.Class({
         this.adapt();
 
         this.wxGetUserInfo();
+        this.wxOpenQuan();
+
+        cc.audioEngine.play(this.audio_music, true, 0.5);
+
+        var self = this;
+        qianqista.init("wx8a93e509b8c64dbd","533863c7c424ed46df717ef963de3f27","奔跑吧雪球",function(){
+            qianqista.datas(function(res){
+                console.log('my datas:', res);
+                if(res.state == 200)
+                {
+                    self.updateLocalData(res.data);
+                }
+            });
+        });
+        qianqista.control(function(res){
+            console.log('my control:', res);
+            if(res.state == 200)
+            {
+                self.NetConfig = res.data;
+                self.updateUIControl();
+            }
+        });
+
+        this.wxVideoLoad();
     },
 
 
     wxGetUserInfo: function()
     {
         var self = this;
-        wx.login({
-            success: function () {
-                wx.getUserInfo({
-                    openIdList:['selfOpenId'],
-                    lang: 'zh_CN',
-                    fail: function (res) {
-                        // iOS 和 Android 对于拒绝授权的回调 errMsg 没有统一，需要做一下兼容处理
-                        if (res.errMsg.indexOf('auth deny') > -1 ||     res.errMsg.indexOf('auth denied') > -1 ) {
-                            // 处理用户拒绝授权的情况
-                            cc.log(res.errMsg);
-                            self.wxOpenSetting();
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            wx.login({
+                success: function () {
+                    wx.getUserInfo({
+                        openIdList:['selfOpenId'],
+                        lang: 'zh_CN',
+                        fail: function (res) {
+                            // iOS 和 Android 对于拒绝授权的回调 errMsg 没有统一，需要做一下兼容处理
+                            if (res.errMsg.indexOf('auth deny') > -1 ||     res.errMsg.indexOf('auth denied') > -1 ) {
+                                // 处理用户拒绝授权的情况
+                                cc.log(res.errMsg);
+                                self.wxOpenSetting();
+                                qianqista.login(false);
+                            }
+                        },
+                        success: function(res)
+                        {
+                            cc.log(res.userInfo);
+                            self.userInfo = res.userInfo;
+                            qianqista.login(true,res.userInfo);
+                            wx.postMessage({ message: "loginSuccess",userInfo:res.userInfo });
                         }
-                    },
-                    success: function(res)
-                    {
-                        cc.log(res.userInfo);
-                        self.userInfo = res.userInfo;
+                    });
+                }
+            });
 
-                        wx.postMessage({ message: "loginSuccess",userInfo:res.userInfo });
-                    }
-                });
-            }
-        });
+            wx.showShareMenu({
+                withShareTicket: true,
+                success: function (res) {
+                    qianqista.share(true);
+                    cc.log(res);
+                },
+                fail: function (res) {
+                    qianqista.share(false);
+                }
+            });
 
-        wx.showShareMenu({
-            withShareTicket: true,
-            success: function (res) {
-                // 分享成功
-                cc.log(res);
-            },
-            fail: function (res) {
-                // 分享失败
-            }
-        });
+            wx.onShareAppMessage(function (ops){
+                return {
+                    query:"channel=sharemenu",
+                    title: "你一定撑不过10秒，不信试试~",
+                    imageUrl: cc.url.raw("resources/zhuanfa.jpg")
+                }
+            });
 
-        wx.onShareAppMessage(function (ops){
-            return {
-                title: "小哥哥，打灰机坚持30秒了解一下！",
-                imageUrl: cc.url.raw("resources/zhuanfa.jpg")
-            }
-        });
-
-
+            wx.updateShareMenu({
+                withShareTicket: true,
+                success: function (res) {
+                    // 分享成功
+                    qianqista.share(true);
+                },
+                fail: function (res) {
+                    // 分享失败
+                    qianqista.share(false);
+                }
+            })
+        }
+        
     },
 
     wxOpenSetting: function()
     {
         var self = this;
-        self.node_quanxian.active = true;
-        var openDataContext = wx.getOpenDataContext();
-        var sharedCanvas = openDataContext.canvas;
-        var button = wx.createOpenSettingButton({
-            type: 'text',
-            text: '打开设置页面',
-            style: {
-                left: sharedCanvas.width/4-50,
-                top: sharedCanvas.height/4+30,
-                width: 100,
-                height: 30,
-                lineHeight: 30,
-                backgroundColor: '#1779a6',
-                color: '#ffffff',
-                textAlign: 'center',
-                fontSize: 12,
-                borderRadius: 4
-            }
-        });
-        button.onTap(function(){
-            wx.getSetting({
-                success: function (res) {
-                    var authSetting = res.authSetting;
-                    button.destroy();
-                    self.node_quanxian.active = false;
-                    if (authSetting['scope.userInfo'] === true) {
-                        wx.getUserInfo({
-                            openIdList:['selfOpenId'],
-                            lang: 'zh_CN',
-                            fail: function (res) {
-                                // iOS 和 Android 对于拒绝授权的回调 errMsg 没有统一，需要做一下兼容处理
-                                if (res.errMsg.indexOf('auth deny') > -1 ||     res.errMsg.indexOf('auth denied') > -1 ) {
-                                    // 处理用户拒绝授权的情况
-                                    cc.log(res.errMsg);
-                                    self.wxOpenSetting();
-                                }
-
-                            },
-                            success: function(res)
-                            {
-                                cc.log(res.userInfo);
-                                self.userInfo = res.userInfo;
-                                wx.postMessage({ message: "loginSuccess",userInfo:res.userInfo });
-                            }
-                        });
-                    } else if (authSetting['scope.userInfo'] === false){
-                        // 用户已拒绝授权，再调用相关 API 或者 wx.authorize 会失败，需要引导用户到设置页面打开授权开关
-                        self.wxOpenSetting();
-                    } else {
-                        // 未询问过用户授权，调用相关 API 或者 wx.authorize 会弹窗询问用户
-                    }
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            self.node_quanxian.active = true;
+            var openDataContext = wx.getOpenDataContext();
+            var sharedCanvas = openDataContext.canvas;
+            var button = wx.createOpenSettingButton({
+                type: 'text',
+                text: '打开设置页面',
+                style: {
+                    left: sharedCanvas.width/4-50,
+                    top: sharedCanvas.height/4+30,
+                    width: 100,
+                    height: 30,
+                    lineHeight: 30,
+                    backgroundColor: '#1779a6',
+                    color: '#ffffff',
+                    textAlign: 'center',
+                    fontSize: 12,
+                    borderRadius: 4
                 }
             });
-        });
+            button.onTap(function(){
+                wx.getSetting({
+                    success: function (res) {
+                        var authSetting = res.authSetting;
+                        button.destroy();
+                        self.node_quanxian.active = false;
+                        if (authSetting['scope.userInfo'] === true) {
+                            wx.getUserInfo({
+                                openIdList:['selfOpenId'],
+                                lang: 'zh_CN',
+                                fail: function (res) {
+                                    // iOS 和 Android 对于拒绝授权的回调 errMsg 没有统一，需要做一下兼容处理
+                                    if (res.errMsg.indexOf('auth deny') > -1 ||     res.errMsg.indexOf('auth denied') > -1 ) {
+                                        // 处理用户拒绝授权的情况
+                                        cc.log(res.errMsg);
+                                        qianqista.login(false);
+                                        self.wxOpenSetting();
+                                    }
 
+                                },
+                                success: function(res)
+                                {
+                                    cc.log(res.userInfo);
+                                    self.userInfo = res.userInfo;
+                                    qianqista.login(true,res.userInfo);
+                                    wx.postMessage({ message: "loginSuccess",userInfo:res.userInfo });
+                                }
+                            });
+                        } else if (authSetting['scope.userInfo'] === false){
+                            // 用户已拒绝授权，再调用相关 API 或者 wx.authorize 会失败，需要引导用户到设置页面打开授权开关
+                            self.wxOpenSetting();
+                        } else {
+                            // 未询问过用户授权，调用相关 API 或者 wx.authorize 会弹窗询问用户
+                        }
+                    }
+                });
+            });
+        }
+        
     },
 
     _updaetSubDomainCanvas: function() {
         if (!this.tex) {
             return;
         }
-        var openDataContext = wx.getOpenDataContext();
-        var sharedCanvas = openDataContext.canvas;
-        this.tex.initWithElement(sharedCanvas);
-        this.tex.handleLoadedTexture();
-        this.display.spriteFrame = new cc.SpriteFrame(this.tex);
-        if(this.display.node.scale == 1)
-            this.display.node.scale = (this.dsize.width / this.display.node.width);
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            var openDataContext = wx.getOpenDataContext();
+            var sharedCanvas = openDataContext.canvas;
+            this.tex.initWithElement(sharedCanvas);
+            this.tex.handleLoadedTexture();
+            this.display.spriteFrame = new cc.SpriteFrame(this.tex);
+            if(this.display.node.scale == 1)
+                this.display.node.scale = (this.dsize.width / this.display.node.width);
+        }
+    },
+
+    wxOpenQuan: function()
+    {
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            var openDataContext = wx.getOpenDataContext();
+            var sharedCanvas = openDataContext.canvas;
+            var quan = cc.find("bootembg/quan",this.GU.main_bg);
+            var sc = sharedCanvas.width/this.dsize.width;
+            var dpi = cc.view._devicePixelRatio;
+            var pos = cc.v2(quan.x*sc/dpi,sharedCanvas.height/dpi-quan.y*sc/dpi);
+            this.quan_button = wx.createGameClubButton({
+                icon: 'white',
+                style: {
+                    left: pos.x - 15,
+                    top: pos.y - 15,
+                    width: 30,
+                    height: 30
+                }
+            })
+        }
+        
+    },
+
+    wxQuanActive: function(active)
+    {
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            if(active)
+                this.quan_button.show();
+            else
+                this.quan_button.hide();
+        }
     },
 
     adapt: function()
     {
-        var nodes = [this.GU.game_bg,this.GU.main_bg,this.GU.pause_bg,this.GU.over_bg,this.GU.fuhuo_bg];
+        var nodes = [this.GU.game_bg,this.GU.main_bg,this.GU.pause_bg,this.GU.over_bg,this.GU.fuhuo_bg,this.GU.fuhuocard_bg];
         for(var i=0;i<nodes.length;i++)
         {
             var items = nodes[i].children;
@@ -229,43 +317,55 @@ cc.Class({
         this.GAME.state = "MAIN";
         this.GAME.Configs = {
             "PlayerHp":3,
-            "Size":[0.3,1.3,60],
-            "Rotate":[200,400,60],
+            "Size":[0.3,1.3,100],
+            "Rotate":[200,400,120],//    (400-200)/100=旋转速度   每帧增加
             "LevelInfo":[
-                {"Time":10,
-                    "OTime":4,
-                    "OBird":[6],
-                    "ORate":[1,1,0]
+                {"Time":20,//             这关的总时间
+                    "OTime":4,//           每4秒出现障碍物
+                    "OBird":[8],//           0代表不出鸟，其他数代表出鸟的时间
+                    "ORate":[1,0,0]
                 },
                 {
-                    "Time":10,
+                    "Time":20,
+                    "OTime":4,
+                    "OBird":[4],
+                    "ORate":[3,2,1]
+                },
+                {
+                    "Time":20,
                     "OTime":3,
-                    "OBird":[5],
+                    "OBird":[],
+                    "ORate":[4,2,0]
+                },
+                {
+                    "Time":20,
+                    "OTime":3,
+                    "OBird":[4],
+                    "ORate":[6,3,1]
+                },
+                {
+                    "Time":20,
+                    "OTime":2,
+                    "OBird":[],
+                    "ORate":[7,3,0]
+                },
+                {
+                    "Time":20,
+                    "OTime":2,
+                    "OBird":[10],
+                    "ORate":[8,4,1]
+                },
+                {
+                    "Time":20,
+                    "OTime":3,
+                    "OBird":[],
                     "ORate":[2,1,0]
                 },
                 {
-                    "Time":10,
+                    "Time":20,
                     "OTime":2,
-                    "OBird":[],
-                    "ORate":[1,0,0]
-                },
-                {
-                    "Time":10,
-                    "OTime":3,
-                    "OBird":[5],
-                    "ORate":[3,1,1]
-                },
-                {
-                    "Time":12,
-                    "OTime":2,
-                    "OBird":[],
-                    "ORate":[1,1,1]
-                },
-                {
-                    "Time":10,
-                    "OTime":2,
-                    "OBird":[],
-                    "ORate":[1,2,1]
+                    "OBird":[6],
+                    "ORate":[3,2,1]
                 },
                 {
                     "Time":10,
@@ -274,52 +374,40 @@ cc.Class({
                     "ORate":[1,0,0]
                 },
                 {
-                    "Time":10,
-                    "OTime":3,
-                    "OBird":[6],
-                    "ORate":[3,1,1]
+                    "Time":20,
+                    "OTime":2,
+                    "OBird":[7],
+                    "ORate":[3,2,1]
                 },
                 {
-                    "Time":10,
+                    "Time":20,
                     "OTime":2,
                     "OBird":[],
-                    "ORate":[1,2,1]
+                    "ORate":[3,1,0]
                 },
                 {
-                    "Time":10,
-                    "OTime":4,
-                    "OBird":[6],
-                    "ORate":[3,0,0]
-                },
-                {
-                    "Time":10,
-                    "OTime":2,
-                    "OBird":[],
-                    "ORate":[3,1,1]
-                },
-                {
-                    "Time":10,
+                    "Time":20,
                     "OTime":1,
                     "OBird":[],
-                    "ORate":[1,2,1]
+                    "ORate":[1,2,0]
                 },
                 {
-                    "Time":10,
+                    "Time":20,
                     "OTime":2,
-                    "OBird":[],
+                    "OBird":[6],
                     "ORate":[3,0,0]
                 },
                 {
-                    "Time":10,
+                    "Time":20,
                     "OTime":3,
                     "OBird":[],
                     "ORate":[3,1,1]
                 },
                 {
-                    "Time":10,
+                    "Time":30,
                     "OTime":1,
                     "OBird":[],
-                    "ORate":[1,2,2]
+                    "ORate":[2,2,1]
                 }
             ]
         };
@@ -386,26 +474,185 @@ cc.Class({
 
         this.GU.main_bg = cc.find("Canvas/ui_bg/main_bg");
         this.GU.main_bg.score = cc.find("score",this.GU.main_bg);
+        this.GU.main_bg.more = cc.find("more",this.GU.main_bg);
+        this.GU.main_bg.gunicon = cc.find("gunicon",this.GU.main_bg);
+        this.GU.main_bg.gunicon.runAction(cc.repeatForever(cc.sequence(
+            cc.rotateBy(0.1,15).easing(cc.easeSineIn()),
+            cc.rotateBy(0.1,-15).easing(cc.easeSineIn()),
+            cc.delayTime(2)
+        )));
 
         var currscore = cc.sys.localStorage.getItem("highscore");
         currscore = currscore ? currscore : 0;
         this.GU.main_bg.score.getComponent("cc.Label").string = currscore+"";
 
         this.GU.pause_bg = cc.find("Canvas/ui_bg/pause_bg");
+        this.node_pause_tishi = cc.find("tishi",this.GU.pause_bg);
+        this.node_pause_hand = cc.find("hand",this.GU.pause_bg);
         this.GU.over_bg = cc.find("Canvas/ui_bg/over_bg");
         this.GU.over_bg.score = cc.find("score",this.GU.over_bg);
+        this.GU.over_bg.more = cc.find("more",this.GU.over_bg);
+        this.GU.over_bg.gunicon = cc.find("gunicon",this.GU.over_bg);
+        this.GU.over_bg.gunicon.runAction(cc.repeatForever(cc.sequence(
+            cc.rotateBy(0.1,15).easing(cc.easeSineIn()),
+            cc.rotateBy(0.1,-15).easing(cc.easeSineIn()),
+            cc.delayTime(2)
+        )));
 
         this.GU.fuhuo_bg = cc.find("Canvas/ui_bg/fuhuo_bg");
         this.GU.fuhuo_bg.score = cc.find("score",this.GU.fuhuo_bg);
-        this.GU.fuhuo_bg.pro = cc.find("pro",this.GU.fuhuo_bg);
-        this.GU.fuhuo_bg.cardnum = cc.find("fuhuo/cardnum",this.GU.fuhuo_bg);
+        this.GU.node_fuhuo_fu_card = cc.find("bg/bg/card",this.GU.fuhuo_bg);
+        this.GU.node_fuhuo_fu_video = cc.find("bg/bg/vedio",this.GU.fuhuo_bg);
+        // this.GU.fuhuo_bg.cardnum = cc.find("fuhuo/cardnum",this.GU.fuhuo_bg);
+        // this.GU.fuhuo_bg.skip = cc.find("skip",this.GU.fuhuo_bg);
 
         this.GU.paihang_bg = cc.find("Canvas/ui_bg/paihang_bg");
 
         this.GU.card_bg = cc.find("Canvas/ui_bg/card_bg");
         this.node_card_num = cc.find("card_box/bg/cardnum",this.GU.card_bg);
 
+        this.GU.fuhuocard_bg = cc.find("Canvas/ui_bg/fuhuocard_bg");
+        this.node_fuhuocard_num = cc.find("card_box/bg/cardnum",this.GU.fuhuocard_bg);
+        this.node_fuhuocard_fuhuo_usecard = cc.find("card_box/bg/fuhuo_usecard",this.GU.fuhuocard_bg);
+
         this.node_quanxian = cc.find("Canvas/node_quanxian");
+
+        this.GU.yindao_bg = cc.find("Canvas/ui_bg/yindao_bg");
+        this.GU.yindao_bg = cc.find("Canvas/ui_bg/yindao_bg");
+        this.node_yindao_tishi = cc.find("yindao/tishi",this.GU.yindao_bg);
+
+        this.node_pause_tishi.active = false;
+        this.node_pause_hand.active = false;
+
+        this.node_main_fuhuo = cc.find("lingqu",this.GU.main_bg);
+        this.updateUIControl();
+    },
+
+    updateUIControl: function()
+    {
+        this.node_main_fuhuo.active = false;
+        this.GU.main_bg.gunicon.active = false;
+        this.GU.main_bg.more.active = false;
+
+        this.GAME.more = null;
+        this.GAME.more2 = null;
+
+        var sto_channel = cc.sys.localStorage.getItem("channel");
+
+        if(this.NetConfig.length>0)
+        {
+            for(var i=0;i<this.NetConfig.length;i++)
+            {
+                var con = this.NetConfig[i];
+                if(con.id == "sharecard2")
+                {
+                    if(con.value == "1")
+                    {
+                        this.node_main_fuhuo.active = true;
+                    }
+                }
+                else if(con.id == "moreicon")
+                {
+                    this.GU.main_bg.gunicon.moreicon = con.value;
+                }
+                else if(con.id == "morepic")
+                {
+                    this.GU.main_bg.gunicon.morepic = con.value;
+                }
+                else
+                {
+                    if(con.id.indexOf("channel") >= 0)
+                    {
+                        if(con.id == "channel_default" && this.GAME.more == null)
+                            this.GAME.more = con.value;
+                        else if(con.id == "channel_default_2" && this.GAME.more2 == null)
+                            this.GAME.more2 = con.value;
+                        if(sto_channel)
+                        {
+                            if(con.id == ("channel_"+sto_channel))
+                                this.GAME.more = con.value;
+                            else if(con.id == ("channel_"+sto_channel+"_2"))
+                                this.GAME.more2 = con.value;
+                        }
+                    }
+                }
+            }
+        }
+
+         if(this.GAME.more)
+        {
+            var pic = this.GAME.more.split("--")[0];
+            // this.GU.main_bg.more.active = true;
+            this.loadPic(this.GU.main_bg.more,pic);
+
+            // this.GU.over_bg.more.active = true;
+            this.loadPic(this.GU.over_bg.more,pic);
+        }
+        if(this.GAME.more2)
+        {
+            var pic = this.GAME.more2.split("--")[0];
+            // this.GU.main_bg.gunicon.active = true;
+            this.loadPic(this.GU.main_bg.gunicon,pic);
+
+            // this.GU.over_bg.gunicon.active = true;
+            this.loadPic(this.GU.over_bg.gunicon,pic);
+        }
+
+        // if(this.GU.main_bg.gunicon.moreicon)
+        // {
+        //     this.loadPic(this.GU.main_bg.gunicon,this.GU.main_bg.gunicon.moreicon);
+        //     this.GU.main_bg.gunicon.active = true;
+
+        //     this.loadPic(this.GU.over_bg.gunicon,this.GU.main_bg.gunicon.moreicon);
+        //     this.GU.over_bg.gunicon.active = true;
+        // }
+    },
+
+    loadPic: function(sp,url)
+    {
+        cc.loader.load({url: url, type: 'png'}, function (err, tex) {
+            if(err)
+            {
+                cc.log(err);
+            }
+            else
+            {
+                var spriteFrame = new cc.SpriteFrame(tex);
+                sp.getComponent("cc.Sprite").spriteFrame = spriteFrame;
+                sp.active = true;
+                // sp.x = cc.winSize.width-spriteFrame.getRect().width/2;
+            }
+        });
+    },
+
+    updateLocalData: function(data)
+    {
+        if(data)
+        {
+            var datas = JSON.parse(data);
+            if(datas.score)
+            {
+                cc.sys.localStorage.setItem("highscore",parseInt(datas.score));
+                this.GU.main_bg.score.getComponent("cc.Label").string = parseInt(datas.score)+"";
+            }
+        }
+        else
+        {
+            this.uploadData();
+        }
+    },
+
+    uploadData: function()
+    {
+        var currscore = cc.sys.localStorage.getItem("highscore");
+        currscore = currscore ? currscore : 0;
+        var datas = {};
+        datas.score = currscore;
+
+        var data = JSON.stringify(datas);
+        qianqista.uploaddatas(data,function(res){
+            console.log("--uploaddatas:",res);
+        });
     },
 
     resetData: function()
@@ -414,6 +661,7 @@ cc.Class({
 
         this.GAME.playerHp = 1;
         this.GAME.playerfuhuo = true;
+        this.GAME.playerfuhuovideo = true;
 
         this.GAME.jumpTimes = 0;
 
@@ -448,6 +696,51 @@ cc.Class({
     {
         this.GU.game_bg.active = true;
         this.GU.selfScore.getComponent("cc.Label").string = "0";
+
+        var self = this;
+
+        var playnum = cc.sys.localStorage.getItem("playnum");
+        playnum = playnum ? playnum : 0;
+        if(playnum == 0)
+        {
+            this.GU.yindao_bg.active = true;
+            self.GAME.state = "STOP";
+            this.GU.yindao_bg.timeout = false;
+            var seq = cc.sequence(
+                cc.delayTime(1),
+                cc.callFunc(function(){
+                    self.node_yindao_tishi.getComponent("cc.Label").string = "点击继续(2)";
+                }),
+                cc.delayTime(1),
+                cc.callFunc(function(){
+                    self.node_yindao_tishi.getComponent("cc.Label").string = "点击继续(1)";
+                }),
+                cc.delayTime(1),
+                cc.callFunc(function(){
+                    self.node_yindao_tishi.getComponent("cc.Label").string = "点击继续";
+                    self.node_yindao_tishi.color = cc.color(255,255,255);
+                    self.GU.yindao_bg.timeout = true;
+                })
+            );
+            self.GU.yindao_bg.runAction(seq);
+        }
+
+        if(cc.sys.os == cc.sys.OS_ANDROID)
+        {
+            if(playnum == 1)
+            {
+                self.node_pause_tishi.active = true;
+                self.node_pause_hand.active = true;
+                self.GU.pause_bg.active = true;
+                self.node_pause_hand.runAction(cc.repeatForever(cc.sequence(
+                    cc.moveBy(0.3,10,0).easing(cc.easeSineIn()),
+                    cc.moveBy(0.3,-10,0).easing(cc.easeSineIn())
+                )));
+                self.GAME.state = "STOP";
+            }
+        }
+        playnum ++;
+        cc.sys.localStorage.setItem("playnum",playnum);
     },
 
     resetBall: function()
@@ -473,6 +766,11 @@ cc.Class({
         this.GU.over_bg.active = false;
         this.GAME.state = "MAIN";
         this.GU.main_bg.active = true;
+        this.wxQuanActive(true);
+
+        var currscore = cc.sys.localStorage.getItem("highscore");
+        currscore = currscore ? currscore : 0;
+        this.GU.main_bg.score.getComponent("cc.Label").string = currscore+"";
 
         this.wxCloseOver();
         this.wxCloseRank();
@@ -481,12 +779,15 @@ cc.Class({
         this.GAME.ballNode.ball.removeAllChildren();
 
         this.resetBall();
+
+        this.wxBannerHide();
     },
 
     wxCloseOver: function()
     {
         this.GU.over_bg.active = false;
         this.display_gray.active = false;
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         wx.postMessage({ message: "closeOver" });
     },
 
@@ -494,13 +795,21 @@ cc.Class({
     {
         this.GU.paihang_bg.active = false;
         this.display_gray_rank.active = false;
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         wx.postMessage({ message: "closeRank" });
+    },
+
+    wxCloseFuhuo: function()
+    {
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+            wx.postMessage({ message: "closeFuhuo" });
     },
 
     wxRank: function()
     {
         this.GU.paihang_bg.active = true;
         this.display_gray_rank.active = true;
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         wx.postMessage({ message: "friendRank" });
     },
 
@@ -508,36 +817,66 @@ cc.Class({
     {
         this.GU.over_bg.active = true;
         this.display_gray.active = true;
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         wx.postMessage({ message: "overRank",score:score });
     },
 
     wxUploadScore: function(score)
     {
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         wx.postMessage({ message: "updateScore",score:score });
+    },
+
+    wxFuhuoRank: function(score)
+    {
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+            wx.postMessage({ message: "fuhuoRank",score:score});
     },
 
     wxGropShare: function()
     {
-        wx.shareAppMessage({
-            title: "小哥哥，打灰机坚持30秒了解一下！",
-            imageUrl: cc.url.raw("resources/zhuanfa.jpg"),
-            success: function(res)
-            {
-                cc.log(res);
-            }
-        });
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            wx.shareAppMessage({
+                query:"channel=groupsharemenu",
+                title: "自从玩了这个游戏，世界杯都不看了",
+                imageUrl: cc.url.raw("resources/zhuanfa.jpg"),
+                success: function(res)
+                {
+                    qianqista.share(true);
+                    cc.log(res);
+                },
+                fail: function()
+                {
+                    qianqista.share(false);
+                }
+            });
+            qianqista.event("btn_grouppaiming");
+        }
+        
     },
     wxGropShareChange: function()
     {
-        var s = "打灰机我拿了"+ this.GAME.score + "分，超过了" + this.getChaoyue()+"的用户，不服来战。";
-        wx.shareAppMessage({
-            title: s,
-            imageUrl: cc.url.raw("resources/zhuanfa.jpg"),
-            success: function(res)
-            {
-                cc.log(res);
-            }
-        });
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            var s = "我滚了"+ this.GAME.score + "分，我变残了，也变强了，你能超过我么？";
+            wx.shareAppMessage({
+                query:"channel=sharechangemenu",
+                title: s,
+                imageUrl: cc.url.raw("resources/zhuanfa.jpg"),
+                success: function(res)
+                {
+                    qianqista.share(true);
+                    cc.log(res);
+                },
+                fail: function()
+                {
+                    qianqista.share(false);
+                }
+            });
+            qianqista.event("btn_share_tiaozhan");
+        }
+        
     },
     wxGropShareCard: function()
     {
@@ -560,46 +899,302 @@ cc.Class({
             return;
         }
 
+        qianqista.event("btn_share_card");
+
         var self = this;
-        wx.shareAppMessage({
-            title: "小哥哥，打灰机坚持30秒了解一下！",
-            imageUrl: cc.url.raw("resources/zhuanfa.jpg"),
-            success: function(res)
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            wx.shareAppMessage({
+                title: "自从玩了这个游戏，世界杯都不看了",
+                imageUrl: cc.url.raw("resources/zhuanfa.jpg"),
+                success: function(res)
+                {
+                    if(res.shareTickets && res.shareTickets.length>0)
+                    {
+                         wx.showToast({
+                            title: "获取到一个复活卡"
+                        });
+                        cc.sys.localStorage.setItem("sharenum",(sharenum+1));
+
+                        var cardnum = cc.sys.localStorage.getItem("cardnum");
+                        cardnum = cardnum ? cardnum : 0;
+                        cardnum = parseInt(cardnum) + 1;
+                        cc.sys.localStorage.setItem("cardnum",cardnum);
+                        self.node_card_num.getComponent("cc.Label").string = cardnum+"";
+
+                        self.node_fuhuocard_num.getComponent("cc.Label").string = cardnum + "";
+                        if(cardnum<1)
+                        {
+                            self.node_fuhuocard_fuhuo_usecard.getComponent("cc.Button").interactable = false;
+                        }
+                        else
+                        {
+                            self.node_fuhuocard_fuhuo_usecard.getComponent("cc.Button").interactable = true;
+                        }
+                    }
+                    else
+                    {
+                        wx.showToast({
+                            title: "请分享到群"
+                        });
+                    }
+                    qianqista.share(true);
+                    cc.log(res);
+                }
+                ,
+                fail: function()
+                {
+                    qianqista.share(false);
+                }
+        });
+        }
+        else
+        {
+            var cardnum = cc.sys.localStorage.getItem("cardnum");
+            cardnum = cardnum ? cardnum : 0;
+            cardnum = parseInt(cardnum) + 1;
+            cc.sys.localStorage.setItem("cardnum",cardnum);
+            self.node_card_num.getComponent("cc.Label").string = cardnum+"";
+
+            self.node_fuhuocard_num.getComponent("cc.Label").string = cardnum + "";
+            if(cardnum<1)
             {
-                wx.showToast({
-                    title: "获取到一个复活卡"
-                });
-                cc.sys.localStorage.setItem("sharenum",(sharenum+1));
-
-                var cardnum = cc.sys.localStorage.getItem("cardnum");
-                cardnum = cardnum ? cardnum : 0;
-                cardnum += 1;
-                cc.sys.localStorage.setItem("cardnum",cardnum);
-                self.node_card_num.getComponent("cc.Label").string = cardnum+"";
-
-                cc.log(res);
+                self.node_fuhuocard_fuhuo_usecard.getComponent("cc.Button").interactable = false;
             }
+            else
+            {
+                self.node_fuhuocard_fuhuo_usecard.getComponent("cc.Button").interactable = true;
+            }
+        }
+    },
+
+    wxGropShareFuhuo: function()
+    {
+        var self = this;
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            wx.shareAppMessage({
+                query:"channel=sharefuhuomenu",
+                title: this.userInfo.nickName +"挑战失败，快来帮帮 Ta",
+                imageUrl: cc.url.raw("resources/zhuanfa.jpg"),
+                success: function(res)
+                {
+                    if(res.shareTickets && res.shareTickets.length>0)
+                    {
+                        wx.showToast({
+                            title: "复活成功"
+                        });
+                        self.fuhuo(false);
+                    }
+                    else
+                    {
+                        wx.showToast({
+                            title: "请分享到群"
+                        });
+                    }
+                    qianqista.share(true);
+                },
+                fail: function()
+                {
+                    qianqista.share(false);
+                }
+            });
+            qianqista.event("btn_share_fuhuo");
+        }
+        else
+        {
+            self.fuhuo(false);
+        }
+    },
+
+    wxVideoLoad: function()
+    {
+        var self = this;
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            this.rewardedVideoAd = wx.createRewardedVideoAd({ adUnitId:'adunit-8f2050166fc0da40'});
+            this.rewardedVideoAd.onLoad(function(){
+                console.log('激励视频 广告加载成功')
+            });
+            this.rewardedVideoAd.onClose(function(res){
+                // 用户点击了【关闭广告】按钮
+                // 小于 2.1.0 的基础库版本，res 是一个 undefined
+                if (res && res.isEnded || res === undefined) {
+                    if(self.GAME.VIDEOAD_TYPE == 1)
+                    {
+                        self.fuhuo2();
+                        wx.showToast({
+                            title: "复活成功"
+                        });
+                    }
+                
+                }
+                else {
+                    // 播放中途退出，不下发游戏奖励
+                    if(self.GAME.VIDEOAD_TYPE == 1)
+                    {
+                        wx.showToast({
+                            title: "复活失败"
+                        });
+                    }
+                }
+                self.resumeMusic();
+            });
+
+
+            var openDataContext = wx.getOpenDataContext();
+            var sharedCanvas = openDataContext.canvas;
+            var sc = sharedCanvas.width/this.dsize.width;
+            var dpi = cc.view._devicePixelRatio;
+            this.bannerAd = wx.createBannerAd({
+                adUnitId: 'adunit-fe2f6a1b565cad33',
+                style: {
+                    left: 0,
+                    top: sharedCanvas.height/dpi-320/3.5,
+                    width: 320,
+                }
+            });
+            var bannerAd = this.bannerAd;
+            this.bannerAd.onResize(function(res){
+                // console.log(res.width, res.height)
+                // console.log(bannerAd.style.realWidth, bannerAd.style.realHeight)
+                bannerAd.style.left = (sharedCanvas.width/dpi-res.width)/2;
+                bannerAd.style.top = sharedCanvas.height/dpi-res.height;
+            });
+
+        }
+    },
+    wxVideoShow: function(type)
+    {
+        var self = this;
+        this.GAME.VIDEOAD_TYPE = type;
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            if(type == 1)
+            {
+                this.rewardedVideoAd.show().catch(function(err){
+                    self.rewardedVideoAd.load().then(function(){
+                        self.rewardedVideoAd.show();
+                    });
+                });
+            }
+        }
+        else
+        {
+            if(type == 1)
+            {
+                this.fuhuo2();
+            }
+        }
+    },
+
+    wxBannerShow: function()
+    {
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+            this.bannerAd.show();
+    },
+
+    wxBannerHide: function()
+    {
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+            this.bannerAd.hide();
+    },
+
+    wxMore: function()
+    {
+        var appIdstr = 'wx604f780b017da7df';
+        var pathstr = 'pages/main/main';
+        if(this.GAME.more)
+        {
+            var ss = this.GAME.more.split("--");
+            appIdstr = ss[1];
+            pathstr = ss[2];
+        }
+
+        wx.navigateToMiniProgram({
+              appId: appIdstr,
+              path: pathstr,
+              extraData: {
+                foo: 'bar'
+              },
+              // envVersion: 'develop',
+              success(res) {
+                // 打开成功
+              }
+            });
+        // wx.previewImage({
+        //     urls: ["https://www.77qqup.com:442/images/apptuijian/hulubox.jpg"],
+        //     success: function (res) {
+        //     },
+        //     fail: function (res) {
+        //         return;
+        //     }
+        // });
+    },
+
+    wxGun: function()
+    {
+        var appIdstr = 'wx604f780b017da7df';
+        var pathstr = 'pages/main/main';
+        if(this.GAME.more2)
+        {
+            var ss = this.GAME.more2.split("--");
+            appIdstr = ss[1];
+            pathstr = ss[2];
+        }
+
+        wx.navigateToMiniProgram({
+          appId: appIdstr,
+          path: pathstr,
+          extraData: {
+            foo: 'bar'
+          },
+          // envVersion: 'develop',
+          success(res) {
+            // 打开成功
+          }
         });
     },
 
     click: function (event,data) {
         if(data == "start")
         {
+            this.wxQuanActive(false);
             this.GU.main_bg.active = false;
             this.GAME.state = "START";
             this.resetData();
             this.resetUI();
             this.resetBall();
+
+            this.wxBannerShow();
         }
         else if(data == "pause")
         {
             this.GU.pause_bg.active = true;
             cc.director.pause();
         }
+        else if(data == "yindao")
+        {
+            if(this.GU.yindao_bg.timeout)
+            {
+                this.GAME.state = "START";
+                this.GU.yindao_bg.active = false;
+            }
+        }
         else if(data == "resume")
         {
-            cc.director.resume();
-            this.GU.pause_bg.active = false;
+            if(this.node_pause_tishi.active)
+            {
+                this.GAME.state = "START";
+                this.node_pause_tishi.active = false;
+                this.node_pause_hand.active = false;
+                this.GU.pause_bg.active = false;
+            }
+            else
+            {
+                cc.director.resume();
+                this.GU.pause_bg.active = false;
+            }
         }
         else if(data == "main")
         {
@@ -610,14 +1205,44 @@ cc.Class({
         {
             this.wxCloseOver();
             this.resetStart();
+
+            this.wxBannerShow();
         }
         else if(data == "change")
         {
             this.wxGropShareChange();
         }
-        else if(data == "fuhuo")
+        else if(data == "fuhuo_usecard")
         {
-            this.fuhuo();
+            this.GU.fuhuocard_bg.active = false;
+            this.fuhuo(true);
+        }
+        else if(data == "qiuzu")
+        {
+            this.wxGropShareCard();
+        }
+        else if(data == "fuhuo_vedio")
+        {
+            this.wxVideoShow(1);
+        }
+        else if(data == "fuhuoka_open")
+        {
+            this.GU.fuhuocard_bg.active = true;
+            var cardnum = cc.sys.localStorage.getItem("cardnum");
+            cardnum = cardnum ? cardnum : 0;
+            this.node_fuhuocard_num.getComponent("cc.Label").string = cardnum + "";
+            if(cardnum<1)
+            {
+                this.node_fuhuocard_fuhuo_usecard.getComponent("cc.Button").interactable = false;
+            }
+            else
+            {
+                this.node_fuhuocard_fuhuo_usecard.getComponent("cc.Button").interactable = true;
+            }
+        }
+        else if(data == "closefuhuocard")
+        {
+            this.GU.fuhuocard_bg.active = false;
         }
         else if(data == "skip")
         {
@@ -625,6 +1250,7 @@ cc.Class({
         }
         else if(data == "paiming")
         {
+            this.wxQuanActive(false);
             this.showPaiming();
         }
         else if(data == "paimingover")
@@ -643,16 +1269,23 @@ cc.Class({
                 this.GU.over_bg.active = true;
                 this.wxOverRank();
             }
+            else
+            {
+                this.wxQuanActive(true);
+            }
         }
         else if(data == "lingqu")
         {
             this.GU.card_bg.active = true;
+            this.wxQuanActive(false);
             var cardnum = cc.sys.localStorage.getItem("cardnum");
             cardnum = cardnum ? cardnum : 0;
             this.node_card_num.getComponent("cc.Label").string = cardnum+"";
+            qianqista.event("btn_main_lingqu");
         }
         else if(data == "closecard")
         {
+            this.wxQuanActive(true);
             this.GU.card_bg.active = false;
         }
         else if(data == "share")
@@ -663,6 +1296,15 @@ cc.Class({
         {
             this.wxGropShareCard();
         }
+        else if(data == "more")
+        {
+            this.wxMore();
+        }
+        else if(data == "gunicon")
+        {
+            this.wxGun();
+        }
+
         cc.log(data);
     },
 
@@ -809,7 +1451,13 @@ cc.Class({
             this.GAME.player.setPositionY(this.GAME.player.getPositionY()+deff);
 
             var temp = dt*10;
-            this.GAME.midScore = this.GAME.midScore + this.GAME.rotate*dt/80;
+            this.GAME.midScore += dt;
+            if(this.GAME.midScore>=1)
+            {
+                this.playerBingGo(1);
+                this.GAME.midScore = 0;
+            }
+            //this.GAME.midScore = this.GAME.midScore + this.GAME.rotate*dt/80;
             //this.playerBingGo(temp);
         }
 
@@ -874,7 +1522,7 @@ cc.Class({
                     if(p1.x-50>p2.x)
                     {
                         this.GAME.bird.score = 0;
-                        this.playerBingGo(1);
+                        this.playerBingGo(2);
                     }
                 }
 
@@ -901,7 +1549,7 @@ cc.Class({
 
             if(this.GAME.operateAble && nowSign==-1 && oriSign*nowSign<0)
             {
-                this.playerBingGo(1);
+                this.playerBingGo(2);
             }
             obs.sign = nowSign;
             if(obs.life<=0 && this.GAME.operateAble)
@@ -982,9 +1630,7 @@ cc.Class({
             cc.callFunc(function()
             {
                 self.playerScorll();
-                var cardnum = cc.sys.localStorage.getItem("cardnum");
-                cardnum = cardnum ? cardnum : 0;
-                if(self.GAME.playerfuhuo && cardnum > 0)
+                if(self.GAME.playerfuhuo || self.GAME.playerfuhuovideo)
                 {
                     self.judgeFuhuo();
                 }
@@ -1017,62 +1663,84 @@ cc.Class({
     judgeFuhuo: function()
     {
         var self = this;
+        if(this.NetConfig.length>0)
+        {
+            for(var i=0;i<this.NetConfig.length;i++)
+            {
+                var con = this.NetConfig[i];
+                if(con.id == "sharecard")
+                {
+                    if(con.value == "0")
+                    {
+                        var seq2 = cc.sequence(
+                            cc.delayTime(2),
+                            cc.callFunc(function(){
+                                self.gameOver();
+                            })
+                        );
+                        self.node.runAction(seq2);
+                        return;
+                    }
+                }
+            }
+        }
+
+
+        var cardnum = cc.sys.localStorage.getItem("cardnum");
+        cardnum = cardnum ? cardnum : 0;
         this.GU.fuhuo_bg.score.getComponent("cc.Label").string = Math.floor(this.GAME.score)+"";
         this.GAME.state = "FUHUO";
         this.GU.fuhuo_bg.active = true;
         this.GU.game_bg.active = false;
+        this.GU.node_fuhuo_fu_card.getComponent("cc.Button").interactable = this.GAME.playerfuhuo;
+        this.GU.node_fuhuo_fu_video.getComponent("cc.Button").interactable = this.GAME.playerfuhuovideo;
 
-        var cardnum = cc.sys.localStorage.getItem("cardnum");
-        cardnum = cardnum ? cardnum : 0;
-        self.GU.fuhuo_bg.cardnum.getComponent("cc.Label").string = cardnum + "";
-
-        this.GU.fuhuo_bg.pro.getComponent("cc.ProgressBar").progress = 1;
-
-        this.GU.fuhuo_bg.pro.runtime = 5;
-        var seq = cc.sequence(
-            cc.delayTime(0.1),
-            cc.callFunc(function(){
-                self.GU.fuhuo_bg.pro.runtime -= 0.1;
-                var p = self.GU.fuhuo_bg.pro.runtime/5;
-                self.GU.fuhuo_bg.pro.getComponent("cc.ProgressBar").progress = p;
-            })
-        );
-        var seq2 = cc.sequence(
-            cc.delayTime(5),
-            cc.callFunc(function(){
-                self.gameOver();
-                self.GU.fuhuo_bg.active = false;
-            })
-        );
-        self.GU.fuhuo_bg.pro.runAction(cc.repeat(seq,50));
-        self.GU.fuhuo_bg.pro.runAction(seq2);
-
+        this.wxFuhuoRank(Math.floor(this.GAME.score));
     },
 
-    fuhuo: function()
+    fuhuo: function(isCard)
     {
         var self = this;
-
-        self.GU.fuhuo_bg.pro.stopAllActions();
-
+        if(isCard)
+        {
+            var cardnum = cc.sys.localStorage.getItem("cardnum");
+            cc.sys.localStorage.setItem("cardnum",(cardnum-1));
+            
+        }
         self.GU.game_bg.active = true;
         self.GU.fuhuo_bg.active = false;
         self.GAME.playerHp = 1;
         self.GAME.playerfuhuo = false;
 
         this.resetBallNode();
+        this.GAME.state = "START";
 
-        var cardnum = cc.sys.localStorage.getItem("cardnum");
-        cc.sys.localStorage.setItem("cardnum",(cardnum-1));
+        this.wxCloseFuhuo();
+    },
+
+    fuhuo2: function()
+    {
+        var self = this;
+
+
+        self.GU.game_bg.active = true;
+        self.GU.fuhuo_bg.active = false;
+        self.GAME.playerHp = 1;
+        self.GAME.playerfuhuovideo = false;
+
+        this.resetBallNode();
+        this.GAME.state = "START";
+
+        this.wxCloseFuhuo();
     },
 
     skip: function()
     {
         var self = this;
 
-        self.GU.fuhuo_bg.pro.stopAllActions();
         self.GU.fuhuo_bg.active = false;
         self.gameOver();
+        this.wxCloseFuhuo();
     },
 
     gameOver: function()
@@ -1088,55 +1756,58 @@ cc.Class({
             cc.sys.localStorage.setItem("highscore",Math.floor(this.GAME.score));
 
         this.wxOverRank(Math.floor(this.GAME.score));
+        this.uploadData();
+
+        this.wxBannerHide();
     },
 
     getChaoyue: function()
     {
-        if(this.GAME.score < 99)
+        if(this.GAME.score <= 5)
         {
             return "9%";
         }
-        else if(this.GAME.score < 200 && this.GAME.score >= 100)
+        else if(this.GAME.score <= 10 && this.GAME.score > 5)
+        {
+            return "11%";
+        }
+        else if(this.GAME.score <= 12 && this.GAME.score > 10)
         {
             return "12%";
         }
-        else if(this.GAME.score < 300 && this.GAME.score >= 200)
+        else if(this.GAME.score <= 15 && this.GAME.score >12)
         {
             return "18%";
         }
-        else if(this.GAME.score < 400 && this.GAME.score >= 300)
+        else if(this.GAME.score <= 18 && this.GAME.score > 15)
         {
             return "32%";
         }
-        else if(this.GAME.score < 500 && this.GAME.score >= 400)
-        {
-            return "45%";
-        }
-        else if(this.GAME.score < 600 && this.GAME.score >= 500)
+        else if(this.GAME.score <= 23 && this.GAME.score >20)
         {
             return "66%";
         }
-        else if(this.GAME.score < 700 && this.GAME.score >= 600)
+        else if(this.GAME.score <= 25 && this.GAME.score > 23)
         {
             return "72%";
         }
-        else if(this.GAME.score < 800 && this.GAME.score >= 700)
+        else if(this.GAME.score <= 28 && this.GAME.score > 25)
         {
             return "81%";
         }
-        else if(this.GAME.score < 1000 && this.GAME.score >= 800)
+        else if(this.GAME.score <= 30 && this.GAME.score >28)
         {
             return "86%";
         }
-        else if(this.GAME.score < 1500 && this.GAME.score >= 1000)
+        else if(this.GAME.score <= 40 && this.GAME.score > 30)
         {
             return "90%";
         }
-        else if(this.GAME.score < 2000 && this.GAME.score >= 1500)
+        else if(this.GAME.score <= 50 && this.GAME.score > 40)
         {
             return "95%";
         }
-        else if(this.GAME.score >= 2000)
+        else if(this.GAME.score > 50)
         {
             return "99%";
         }
@@ -1144,6 +1815,7 @@ cc.Class({
 
     resetStart: function()
     {
+        this.GAME.state = "START";
         this.resetData();
         this.resetUI();
         this.GAME.ballNode.scale = this.GAME.size;
@@ -1155,7 +1827,6 @@ cc.Class({
         cc.log("resetBallNode");
         this.GU.game_bg.active = true;
         this.GU.over_bg.active = false;
-        this.GAME.state = "START";
 
         var self = this;
         var x = Math.cos(15*Math.PI/180)*700;
@@ -1484,7 +2155,10 @@ cc.Class({
         }
 
         this.subdt += dt;
-        if(this.subdt > 0.1)
+        var sdd = 0.02;
+        if(this.GAME.state == "START")
+            sdd = 0.1;
+        if(this.subdt > sdd)
         {
             this.subdt = 0;
             this._updaetSubDomainCanvas();

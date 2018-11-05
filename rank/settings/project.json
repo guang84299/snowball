@@ -14,12 +14,12 @@
   "design-resolution-height": 640,
   "design-resolution-width": 960,
   "excluded-modules": [
-    "Mask",
     "CCSpriteDistortion",
     "LabelOutline",
     "ParticleSystem",
     "TiledMap",
     "Spine Skeleton",
+    "Widget",
     "ProgressBar",
     "Toggle",
     "PageView",
@@ -55,5 +55,6 @@
     "width": 960
   },
   "use-customize-simulator": false,
-  "use-project-simulator-setting": false
+  "use-project-simulator-setting": false,
+  "start-scene": "current"
 }
