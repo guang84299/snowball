@@ -69,41 +69,59 @@ module.exports = {
         this.secret = secret;
         this.gameName = gameName;
         this.initcallback = initcallback;
-        var self = this;
+
+        this.getUserInfo();
+    },
+
+    getUserInfo: function()
+    {
         if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
         {
-            var opts = wx.getLaunchOptionsSync();
-            if(opts)
+            var self = this;
+            var token = cc.sys.localStorage.getItem("vivo_token");
+            if(token)
             {
-                var path = opts.path;
-                var query = opts.query;
-                var scene = opts.scene;
-                if(path && path.indexOf('channel=') != -1)
-                    this.channel = path.substr(path.indexOf("channel=")+8);
-                if(this.channel == "" || this.channel == null)
-                {
-                    if(query && query.channel && query.channel.length > 0)
-                        this.channel = query.channel;
-                }
-                if(this.channel == "" || this.channel == null)
-                {
-                    this.channel = scene+"";
-                }
-
-                var sto_channel = cc.sys.localStorage.getItem("channel");
-                if(!sto_channel)
-                    cc.sys.localStorage.setItem("channel",this.channel);
+                qg.getProfile({
+                    token: token,
+                    success: function(data){
+                        self.userName = data.nickname;
+                        self.power = 1;
+                        self.openid = data.openid;
+                        self.state = 1;
+                        self.initdata();
+                    },
+                    fail: function(data, code) {
+                        //qg.showToast({
+                        //    message: "handling fail, code=" + code
+                        //})
+                        self.getToken();
+                    }
+                })
             }
+            else
+            {
+                this.getToken();
+            }
+        }
+    },
 
-            console.log('opts:', opts);
-            console.log('channel:', this.channel);
+    getToken: function()
+    {
+        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        {
+            var self = this;
+            qg.authorize({
+                type: "token",
+                success: function (data) {
+                    self.session_key = data.accessToken;
+                    cc.sys.localStorage.setItem("vivo_token",data.accessToken);
+                    self.getUserInfo();
+                },
+                fail: function (data, code) {
 
-            wx.onShow(function(res){
-                self.open();
-                console.log('onShow:', res);
+                }
             });
         }
-
     },
 
     login: function(isSuccess, userInfo)

@@ -79,8 +79,8 @@ cc.Class({
         this.addListener();
         this.adapt();
 
-        this.wxGetUserInfo();
-        this.wxOpenQuan();
+        //this.wxGetUserInfo();
+        //this.wxOpenQuan();
 
         cc.audioEngine.play(this.audio_music, true, 0.5);
 
@@ -103,7 +103,7 @@ cc.Class({
             }
         });
 
-        this.wxVideoLoad();
+        //this.wxVideoLoad();
     },
 
 
@@ -277,13 +277,13 @@ cc.Class({
 
     wxQuanActive: function(active)
     {
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-        {
-            if(active)
-                this.quan_button.show();
-            else
-                this.quan_button.hide();
-        }
+        //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        //{
+        //    if(active)
+        //        this.quan_button.show();
+        //    else
+        //        this.quan_button.hide();
+        //}
     },
 
     adapt: function()
@@ -785,52 +785,52 @@ cc.Class({
 
     wxCloseOver: function()
     {
-        this.GU.over_bg.active = false;
-        this.display_gray.active = false;
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-        wx.postMessage({ message: "closeOver" });
+        //this.GU.over_bg.active = false;
+        //this.display_gray.active = false;
+        //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        //wx.postMessage({ message: "closeOver" });
     },
 
     wxCloseRank: function()
     {
-        this.GU.paihang_bg.active = false;
-        this.display_gray_rank.active = false;
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-        wx.postMessage({ message: "closeRank" });
+        //this.GU.paihang_bg.active = false;
+        //this.display_gray_rank.active = false;
+        //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        //wx.postMessage({ message: "closeRank" });
     },
 
     wxCloseFuhuo: function()
     {
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-            wx.postMessage({ message: "closeFuhuo" });
+        //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        //    wx.postMessage({ message: "closeFuhuo" });
     },
 
     wxRank: function()
     {
-        this.GU.paihang_bg.active = true;
-        this.display_gray_rank.active = true;
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-        wx.postMessage({ message: "friendRank" });
+        //this.GU.paihang_bg.active = true;
+        //this.display_gray_rank.active = true;
+        //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        //wx.postMessage({ message: "friendRank" });
     },
 
     wxOverRank: function(score)
     {
-        this.GU.over_bg.active = true;
-        this.display_gray.active = true;
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-        wx.postMessage({ message: "overRank",score:score });
+        //this.GU.over_bg.active = true;
+        //this.display_gray.active = true;
+        //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        //wx.postMessage({ message: "overRank",score:score });
     },
 
     wxUploadScore: function(score)
     {
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-        wx.postMessage({ message: "updateScore",score:score });
+        //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        //wx.postMessage({ message: "updateScore",score:score });
     },
 
     wxFuhuoRank: function(score)
     {
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-            wx.postMessage({ message: "fuhuoRank",score:score});
+        //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        //    wx.postMessage({ message: "fuhuoRank",score:score});
     },
 
     wxGropShare: function()
@@ -1090,14 +1090,14 @@ cc.Class({
 
     wxBannerShow: function()
     {
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-            this.bannerAd.show();
+        //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        //    this.bannerAd.show();
     },
 
     wxBannerHide: function()
     {
-        if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
-            this.bannerAd.hide();
+        //if(cc.sys.os == cc.sys.OS_ANDROID || cc.sys.os == cc.sys.OS_IOS)
+        //    this.bannerAd.hide();
     },
 
     wxMore: function()
@@ -2154,15 +2154,15 @@ cc.Class({
             }
         }
 
-        this.subdt += dt;
-        var sdd = 0.02;
-        if(this.GAME.state == "START")
-            sdd = 0.1;
-        if(this.subdt > sdd)
-        {
-            this.subdt = 0;
-            this._updaetSubDomainCanvas();
-        }
+        //this.subdt += dt;
+        //var sdd = 0.02;
+        //if(this.GAME.state == "START")
+        //    sdd = 0.1;
+        //if(this.subdt > sdd)
+        //{
+        //    this.subdt = 0;
+        //    this._updaetSubDomainCanvas();
+        //}
 
     }
 });
