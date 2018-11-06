@@ -85,7 +85,7 @@ cc.Class({
         cc.audioEngine.play(this.audio_music, true, 0.5);
 
         var self = this;
-        qianqista.init("wx8a93e509b8c64dbd","533863c7c424ed46df717ef963de3f27","奔跑吧雪球",function(){
+        qianqista.init("100000145","ec0a5e32eaa79dc3069890a9337341de","奔跑吧雪球-vivo",function(){
             qianqista.datas(function(res){
                 console.log('my datas:', res);
                 if(res.state == 200)
@@ -1630,12 +1630,12 @@ cc.Class({
             cc.callFunc(function()
             {
                 self.playerScorll();
-                if(self.GAME.playerfuhuo || self.GAME.playerfuhuovideo)
-                {
-                    self.judgeFuhuo();
-                }
-                else
-                {
+                //if(self.GAME.playerfuhuo || self.GAME.playerfuhuovideo)
+                //{
+                //    self.judgeFuhuo();
+                //}
+                //else
+                //{
                     var seq2 = cc.sequence(
                         cc.delayTime(2),
                         cc.callFunc(function(){
@@ -1643,7 +1643,7 @@ cc.Class({
                         })
                     );
                     self.node.runAction(seq2);
-                }
+                //}
             })
         );
         this.node.runAction(act);

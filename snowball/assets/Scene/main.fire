@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.691250880878012,
-      "y": 0.691250880878012,
+      "x": 0.2713208654895338,
+      "y": 0.2713208654895338,
       "z": 1
     },
     "_quat": {
@@ -4200,7 +4200,7 @@
       "__id__": 66
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -4299,7 +4299,7 @@
         "__id__": 109
       }
     ],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -4328,7 +4328,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0,
+      "y": 100,
       "z": 0
     },
     "_scale": {
@@ -4398,8 +4398,8 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": 132,
-      "y": 127,
+      "x": 360,
+      "y": 89,
       "z": 0
     },
     "_scale": {
@@ -4431,7 +4431,7 @@
       "__id__": 91
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -4531,9 +4531,9 @@
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 182,
+      "g": 182,
+      "b": 182,
       "a": 255
     },
     "_contentSize": {
@@ -4549,7 +4549,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -90,
+      "y": 0,
       "z": 0
     },
     "_scale": {
@@ -4584,8 +4584,8 @@
     "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_useOriginalSize": false,
-    "_string": "好友排行",
-    "_N$string": "好友排行",
+    "_string": "世界排行",
+    "_N$string": "世界排行",
     "_fontSize": 30,
     "_lineHeight": 40,
     "_enableWrapText": false,
@@ -4606,7 +4606,7 @@
       "__id__": 91
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -4781,7 +4781,7 @@
         "__id__": 105
       }
     ],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -5192,7 +5192,7 @@
         "__id__": 114
       }
     ],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [],
     "_prefab": null,
@@ -5539,7 +5539,7 @@
       "__id__": 66
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -5709,7 +5709,7 @@
       "__id__": 66
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -8366,7 +8366,7 @@
       "__id__": 174
     },
     "_enabled": true,
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_useOriginalSize": false,
     "_string": "得分",
@@ -8483,7 +8483,7 @@
         "__id__": 179
       }
     ],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -8515,7 +8515,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 360,
-      "y": 420,
+      "y": 660,
       "z": 0
     },
     "_scale": {
@@ -8778,7 +8778,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 360,
-      "y": 277,
+      "y": 517,
       "z": 0
     },
     "_scale": {
@@ -9131,7 +9131,7 @@
       "__id__": 191
     },
     "_enabled": true,
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_useOriginalSize": false,
     "_string": "返回主页 >",
@@ -9238,7 +9238,7 @@
         "__id__": 196
       }
     ],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [],
     "_prefab": null,
@@ -9421,7 +9421,7 @@
       "__id__": 197
     },
     "_enabled": true,
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_useOriginalSize": false,
     "_string": "查看全部排行 >",
@@ -9524,7 +9524,7 @@
       "__id__": 169
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
@@ -9694,7 +9694,7 @@
       "__id__": 169
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_level": 0,
     "_components": [
       {
