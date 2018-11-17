@@ -79,9 +79,6 @@ cc.Class({
         this.addListener();
         this.adapt();
 
-        //this.wxGetUserInfo();
-        //this.wxOpenQuan();
-
         cc.audioEngine.play(this.audio_music, true, 0.5);
 
         var self = this;
@@ -103,6 +100,8 @@ cc.Class({
             }
         });
 
+        //this.wxGetUserInfo();
+        //this.wxOpenQuan();
         //this.wxVideoLoad();
     },
 
@@ -645,7 +644,7 @@ cc.Class({
     uploadData: function()
     {
         var currscore = cc.sys.localStorage.getItem("highscore");
-        currscore = currscore ? currscore : 0;
+        currscore = currscore ? Number(currscore) : 0;
         var datas = {};
         datas.score = currscore;
 
@@ -1815,7 +1814,7 @@ cc.Class({
 
     resetStart: function()
     {
-        this.GAME.state = "START";
+        //this.GAME.state = "START";
         this.resetData();
         this.resetUI();
         this.GAME.ballNode.scale = this.GAME.size;
@@ -1849,8 +1848,14 @@ cc.Class({
                 self.GAME.player.y = cc.winSize.height*0.7;
                 self.GAME.player.opacity = 0;
 
+                self.GAME.player.stopAllActions();
                 self.GAME.player.runAction(cc.moveTo(0.1,cc.v2(cc.winSize.width/2,437+373*self.GAME.size-5)));
-                self.GAME.player.runAction(cc.fadeIn(0.1));
+                self.GAME.player.runAction(cc.sequence(
+                    cc.fadeIn(0.1),
+                    cc.callFunc(function(){
+                        self.GAME.state = "START";
+                    })
+                ));
 
                 self.GAME.player.rotation = 0;
                 var st = self.GAME.player.getComponent(sp.Skeleton);

@@ -75,11 +75,11 @@
 <key>finishColorAlpha</key>
 <real>0</real>
 <key>finishColorBlue</key>
-<real>0</real>
+<real>1</real>
 <key>finishColorGreen</key>
-<real>0</real>
+<real>1</real>
 <key>finishColorRed</key>
-<real>0</real>
+<real>1</real>
 <key>finishColorVarianceAlpha</key>
 <real>0</real>
 <key>finishColorVarianceBlue</key>

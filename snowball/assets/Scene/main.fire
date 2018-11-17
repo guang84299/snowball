@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.2713208654895338,
-      "y": 0.2713208654895338,
+      "x": 0.12058080808080808,
+      "y": 0.12058080808080808,
       "z": 1
     },
     "_quat": {
@@ -2327,7 +2327,7 @@
     },
     "_children": [],
     "_active": true,
-    "_level": 0,
+    "_level": 1,
     "_components": [
       {
         "__id__": 50
@@ -2377,7 +2377,7 @@
     "_skewY": 0,
     "_zIndex": 0,
     "groupIndex": 0,
-    "_id": "9cS0hnzXpOapd91THKBEmx"
+    "_id": "6c6/IH9rVDo7QQrL04nsJG"
   },
   {
     "__type__": "cc.ParticleSystem",
@@ -2391,7 +2391,7 @@
     "_dstBlendFactor": 1,
     "_custom": false,
     "_file": {
-      "__uuid__": "ef68e33b-875e-4413-83c7-34e6e7bcfced"
+      "__uuid__": "cc7ea385-e625-4aee-986e-e1d217e2a8c1"
     },
     "_spriteFrame": null,
     "_stopped": true,
@@ -2418,9 +2418,9 @@
     },
     "_endColor": {
       "__type__": "cc.Color",
-      "r": 0,
-      "g": 0,
-      "b": 0,
+      "r": 255,
+      "g": 255,
+      "b": 255,
       "a": 0
     },
     "_endColorVar": {
@@ -2471,7 +2471,7 @@
     "rotatePerS": 0,
     "rotatePerSVar": 0,
     "_N$preview": true,
-    "_id": "4eX13yq69CEKeAPG+QgDlG"
+    "_id": "33CIqIjqFHC6FAZom3wCdI"
   },
   {
     "__type__": "cc.Node",
@@ -15743,7 +15743,7 @@
       "__id__": 333
     },
     "_enabled": true,
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_useOriginalSize": false,
     "_string": "请打开授权，并继续游戏",

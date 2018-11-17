@@ -246,7 +246,7 @@ module.exports = {
     {
         if(this.state == 1)
         {
-            this.sendRequest("uploaddatas",{gameId:this.gameId,openid:this.openid,datas:datas},function(res){
+            this.httpPost("uploaddatas",{gameId:this.gameId,openid:this.openid,datas:datas},function(res){
                 console.log("uploaddatas:",res);
                 if(callback)
                     callback(res);
@@ -320,6 +320,47 @@ module.exports = {
         }
         xhr.send();
         return xhr;
+    },
+
+    httpPost: function (url, params, handler) {
+        var xhr = cc.loader.getXMLHttpRequest();
+        var requestURL = this.url + url;
+        console.log("RequestURL:" + requestURL);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && (xhr.status >= 200 && xhr.status < 300)) {
+                try {
+                    var ret = JSON.parse(xhr.responseText);
+                    if (handler !== null) {
+                        handler(ret);
+                    }
+                } catch (e) {
+                    console.log("sendRequest Err:" + e);
+                } finally {}
+            }
+        };
+        xhr.open("POST", requestURL, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        if (cc.sys.isNative) {
+            xhr.setRequestHeader("Accept-Encoding", "gzip,deflate");
+        }
+
+        // note: In Internet Explorer, the timeout property may be set only after calling the open()
+        // method and before calling the send() method.
+        xhr.timeout = 20000;// 5 seconds for timeout
+
+        var datas = "";
+        var i = 0;
+        for (var k in params) {
+            if (i != 0) {
+                datas += "&";
+            }
+            datas += k + "=" + params[k];
+            i++;
+        }
+        console.log("datas:" + datas);
+        xhr.send(datas);
+
+        //xhr.send(params);
     }
 
 };
