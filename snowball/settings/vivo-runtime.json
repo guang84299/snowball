@@ -2,7 +2,7 @@
   "deviceOrientation": "portrait",
   "icon": "/assets/Texture/icon.png",
   "logLevel": "log",
-  "minPlatformVersion": "1000",
+  "minPlatformVersion": "1020",
   "name": "奔跑吧雪球",
   "npmPath": "/usr/local/bin/npm",
   "package": "com.qianqi.snowball.vivo",

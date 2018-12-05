@@ -1,1 +1,1 @@
-{"package":"com.qianqi.snowball.vivo","name":"奔跑吧雪球","icon":"/image/icon.png","versionName":"1.0.0","versionCode":"1","minPlatformVersion":"1000","deviceOrientation":"portrait","type":"game","config":{"logLevel":"log"},"display":{}}
+{"package":"com.qianqi.snowball.vivo","name":"奔跑吧雪球","icon":"/image/icon.png","versionName":"1.0.0","versionCode":"1","minPlatformVersion":"1020","deviceOrientation":"portrait","type":"game","config":{"logLevel":"log"},"display":{}}

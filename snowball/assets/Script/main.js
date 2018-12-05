@@ -759,6 +759,10 @@ cc.Class({
 
     goMain: function()
     {
+        this.node.stopAllActions();
+        this.GAME.player.stopAllActions();
+        this.GAME.ballNode.stopAllActions();
+
         this.resetData();
         this.GU.pause_bg.active = false;
         this.GU.game_bg.active = false;
